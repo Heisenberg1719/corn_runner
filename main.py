@@ -3,6 +3,7 @@ import time
 import threading
 import requests
 import logging
+from tqdm import tqdm
 
 # Configure logging
 logging.basicConfig(
@@ -35,7 +36,9 @@ def run_scheduler():
     schedule.every(1).minutes.do(hit_urls)
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        # Progress bar countdown
+        for _ in tqdm(range(60), desc="Waiting for next URL hit", unit="s"):
+            time.sleep(1)
 
 if __name__ == "__main__":
     # Run the scheduler in a separate thread to avoid blocking the main process
