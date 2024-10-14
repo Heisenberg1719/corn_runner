@@ -1,18 +1,20 @@
-# Use the official Python image from Docker Hub
+# Use the official Python image from DockerHub
 FROM python:3.9-slim
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt .
+# Copy requirements.txt first for leveraging Docker cache
+COPY requirements.txt /app/requirements.txt
+
+# Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire application code to the container
-COPY . .
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Expose port 5000 for the Flask app
+# Expose port 5000 for the FastAPI server
 EXPOSE 5000
 
-# Run the Flask app using Waitress
-CMD ["python", "main.py"]
+# Run the main application using uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]

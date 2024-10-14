@@ -1,5 +1,3 @@
-Flask
-requests
-waitress
-schedule
-Werkzeug
+fastapi
+uvicorn
+aiohttp
