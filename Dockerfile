@@ -1,14 +1,18 @@
-# Base image
-FROM python:3.12-slim
+# Use the official Python image from Docker Hub
+FROM python:3.9-slim
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the Python script and other necessary files
-COPY main.py /app
+# Copy the requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies
-RUN pip install requests schedule tqdm
+# Copy the entire application code to the container
+COPY . .
 
-# Command to run the Python script
+# Expose port 5000 for the Flask app
+EXPOSE 5000
+
+# Run the Flask app using Waitress
 CMD ["python", "main.py"]

@@ -3,7 +3,8 @@ import time
 import threading
 import requests
 import logging
-from tqdm import tqdm
+from flask import Flask, jsonify
+from waitress import serve
 
 # Configure logging
 logging.basicConfig(
@@ -21,30 +22,41 @@ URLS = [
     "https://sotrueplay.onrender.com"
 ]
 
-def hit_urls():
-    for url in URLS:
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                logging.info(f"Successfully hit URL: {url}, Status Code: {response.status_code}")
-            else:
-                logging.warning(f"Failed to hit URL: {url}, Status Code: {response.status_code}")
-        except requests.RequestException as e:
-            logging.error(f"Error occurred while hitting {url}: {e}")
+app = Flask(__name__)
+log_messages = []  # Store log messages for review
 
-def run_scheduler():
-    schedule.every(1).minutes.do(hit_urls)
+# Function to hit URLs
+def hit_urls():
     while True:
-        schedule.run_pending()
-        # Progress bar countdown
-        for _ in tqdm(range(60), desc="Waiting for next URL hit", unit="s"):
-            time.sleep(1)
+        for url in URLS:
+            try:
+                response = requests.get(url, timeout=10)
+                if response.status_code == 200:
+                    log_msg = f"Successfully hit URL: {url}, Status Code: {response.status_code}"
+                    logging.info(log_msg)
+                else:
+                    log_msg = f"Failed to hit URL: {url}, Status Code: {response.status_code}"
+                    logging.warning(log_msg)
+                log_messages.append(log_msg)
+            except requests.RequestException as e:
+                log_msg = f"Error occurred while hitting {url}: {e}"
+                logging.error(log_msg)
+                log_messages.append(log_msg)
+        time.sleep(45)  
+
+# API to review logs in a traditional, non-real-time manner
+@app.route('/', methods=['GET'])
+def get_logs():
+    return jsonify({"logs": log_messages[-20:]})  
+
+def run_flask_app():
+    # Run the Flask app using Waitress in production
+    serve(app, host='0.0.0.0', port=5000)
 
 if __name__ == "__main__":
-    # Run the scheduler in a separate thread to avoid blocking the main process
-    scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+    # Start the scheduler in a separate thread to hit URLs periodically
+    scheduler_thread = threading.Thread(target=hit_urls, daemon=True)
     scheduler_thread.start()
 
-    # Keep the server alive
-    while True:
-        pass
+    # Run the Flask app using Waitress in the main thread
+    run_flask_app()
