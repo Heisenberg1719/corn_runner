@@ -11,4 +11,4 @@ COPY hit_urls.py /app
 RUN pip install requests schedule tqdm
 
 # Command to run the Python script
-CMD ["python", "hit_urls.py"]
+CMD ["python", "main.py"]
