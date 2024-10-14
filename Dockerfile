@@ -5,7 +5,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Copy the Python script and other necessary files
-COPY hit_urls.py /app
+COPY main.py /app
 
 # Install dependencies
 RUN pip install requests schedule tqdm
