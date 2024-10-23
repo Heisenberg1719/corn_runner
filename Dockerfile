@@ -8,10 +8,10 @@ WORKDIR /app
 COPY . /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir requests schedule
+RUN pip install --no-cache-dir telebot requests schedule psutil
 
-# Define environment variable
+# Define environment variable (you should set TELEGRAM_BOT_TOKEN when running the container)
 ENV NAME World
 
-# Run ping_service.py when the container launches
+# Run main.py when the container launches
 CMD ["python", "main.py"]
